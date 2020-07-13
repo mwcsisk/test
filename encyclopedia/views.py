@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 from . import util
 
@@ -18,4 +18,13 @@ def entry(request, title):
     else:
         return render(request, "encyclopedia/error.html", {
             "title": title
+        })
+
+def search(request):
+    query = request.GET.get('q', '')
+    if query in util.list_entries():
+        return redirect('entry', title=query)
+    else:
+        return render(request, "encyclopedia/error.html", {
+            "title": query
         })
