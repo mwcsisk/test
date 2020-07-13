@@ -1,4 +1,8 @@
 from django.shortcuts import render, redirect
+from django.core.files.storage import default_storage
+from django.http import HttpResponse
+
+import os
 
 from . import util
 
@@ -33,3 +37,21 @@ def search(request):
         "query": query,
         "results": results
     })
+
+def new(request):
+    if request.method == "POST":
+        errors = []
+        title = request.POST.get('t')
+
+        for entry in util.list_entries():
+            if title.casefold() == entry.casefold():
+                errors.append(f"Page '{entry}' already exists.")
+        
+        if not errors:
+            with default_storage.open(f"entries/{title}.md", "w") as f:
+                f.write(request.POST.get('txt'))
+            return redirect('entry', title=title)
+        else:
+            return HttpResponse("TODO")
+    else:
+        return render(request, "encyclopedia/new.html")
