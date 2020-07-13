@@ -22,9 +22,14 @@ def entry(request, title):
 
 def search(request):
     query = request.GET.get('q', '')
-    if query in util.list_entries():
-        return redirect('entry', title=query)
-    else:
-        return render(request, "encyclopedia/error.html", {
-            "title": query
-        })
+
+    results = []
+    for entry in util.list_entries():
+        if query.casefold() == entry.casefold():
+            return redirect('entry', title=entry)
+        elif query.casefold() in entry.casefold():
+            results.append(entry)
+    return render(request, "encyclopedia/search.html", {
+        "query": query,
+        "results": results
+    })
